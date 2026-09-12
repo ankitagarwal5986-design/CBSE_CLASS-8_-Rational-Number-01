@@ -349,6 +349,22 @@
       border: 1px solid var(--border-soft);
       border-radius: 8px;
       background: #fff;
+      display: none;
+    }
+
+    .step-box.unlocked {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-box.success {
+      border-color: var(--green-ok);
+      background: var(--green-surf);
     }
 
     .step-text-wrap {
@@ -379,25 +395,50 @@
       box-shadow: 0 0 0 3px rgba(14,165,233,0.2);
     }
 
-    .btn-save-step {
-      background: var(--brand-blue);
+    .inline-blank:disabled {
+      border: 1px solid var(--green-ok);
+      background: #fff;
+      color: var(--green-ok);
+      cursor: not-allowed;
+    }
+
+    .btn-verify {
+      background: var(--accent-cyan);
       color: #fff;
       border: none;
-      padding: 7px 14px;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-verify:hover {
+      background: var(--brand-blue);
+    }
+
+    .btn-reveal {
+      background: var(--brand-gold);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
       border-radius: 6px;
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
+      margin-left: 6px;
     }
 
-    .btn-save-step:hover {
-      background: var(--navy-dark);
+    .btn-reveal:hover {
+      background: var(--gold-dark);
     }
 
-    .saved-status-badge {
+    .attempts-badge {
       font-size: 0.8rem;
       font-weight: 700;
-      color: var(--green-ok);
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      color: #64748b;
       margin-left: 6px;
     }
 
@@ -521,16 +562,70 @@
       font-weight: 800;
     }
 
-    .palette-btn.answered {
-      background: var(--brand-blue) !important;
+    .palette-btn.completed {
+      background: var(--green-ok) !important;
       color: #fff !important;
-      border-color: var(--brand-blue) !important;
+      border-color: var(--green-ok) !important;
     }
 
     .palette-btn.skipped {
       background: var(--brand-gold) !important;
       color: #fff !important;
       border-color: var(--gold-dark) !important;
+    }
+
+    .tool-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-soft);
+      margin-bottom: 12px;
+    }
+
+    .tool-tabs button {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .tool-tabs button.active {
+      color: var(--brand-blue);
+      border-bottom: 2px solid var(--brand-blue);
+    }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .keypad-btn {
+      padding: 8px 4px;
+      border: 1px solid var(--border-soft);
+      background: #fff;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .keypad-btn:hover {
+      background: var(--bg-tint);
+    }
+
+    #calcDisplay {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      font-size: 1rem;
+      text-align: right;
+      margin-bottom: 8px;
+      background: #f8fafc;
     }
 
     .hero-score-card {
@@ -595,7 +690,7 @@
     }
 
     @media print {
-      header, nav, .palette-box, .btn-primary, #loginGateView, .nav-toolbar {
+      header, nav, .palette-box, #toolsPanel, .btn-primary, .btn-verify, #loginGateView, .nav-toolbar {
         display: none !important;
       }
       body { background: #fff; }
@@ -632,55 +727,88 @@
 
   <!-- Navigation Bar -->
   <nav>
-    <button class="tab-btn active" id="tabTestBtn" onclick="switchView('testView')">✍️ Live Practice Workstation</button>
+    <button class="tab-btn active" id="tabPracticeBtn" onclick="switchView('practiceView')">✍️ Interactive Practice Sheet</button>
     <button class="tab-btn" id="tabTheoryBtn" onclick="switchView('theoryView')">📖 Comprehensive Concept Notes</button>
-    <button class="tab-btn" id="tabResultsBtn" onclick="switchView('resultsView')">📊 Final Scorecard &amp; Solutions</button>
+    <button class="tab-btn" id="tabResultsBtn" onclick="switchView('resultsView')">📋 Test Results &amp; Complete Solutions</button>
   </nav>
 
-  <!-- Student Authentication Modal (Login Condition Rule) -->
+  <!-- Student Authentication Modal (Strict Login Rule) -->
   <div id="loginGateView">
     <div class="login-box">
-      <h2>Rational Numbers Assessment Portal</h2>
-      <p>Class 8 Mathematics • Complete Practice Workstation</p>
+      <h2>Rational Numbers Portal</h2>
+      <p>Class 8 Mathematics • Complete 22-Problem Interactive Learning Sheet</p>
       <input type="text" id="studentNameInput" placeholder="Enter Student Name" />
       <button class="btn-primary" onclick="initDirectLogin()">Start Practice Session</button>
     </div>
   </div>
 
   <main>
-    <!-- View 1: Live Interactive Test Workstation (No Answers Shown during solving) -->
-    <div id="testView" class="view active">
+    <!-- View 1: Interactive Practice Sheet (2 Attempts + Show Solution Pattern) -->
+    <div id="practiceView" class="view active">
       <div class="sheet-grid">
         <div class="question-card" id="activeQuestionCard"></div>
 
         <aside>
           <div class="palette-box">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <h4>Question Palette</h4>
-              <span style="font-size:0.8rem; color:var(--text-muted);" id="paletteCount">0 / 20 Answered</span>
+              <h4>Abhyas Palette</h4>
+              <span style="font-size:0.8rem; color:var(--text-muted);" id="paletteCount">0 / 22 Completed</span>
             </div>
 
             <div class="palette-legend">
-              <div class="legend-item"><span class="legend-dot" style="background:var(--brand-blue);"></span> Answered</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--green-ok);"></span> Solved</div>
               <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Skipped</div>
               <div class="legend-item"><span class="legend-dot" style="background:#7dd3fc;"></span> Active</div>
               <div class="legend-item"><span class="legend-dot" style="background:#f0f9ff; border:1px solid #bae6fd;"></span> Unseen</div>
             </div>
             
             <div class="palette-grid" id="paletteGrid"></div>
-            
-            <button class="btn-primary" style="margin-top: 10px; background: var(--navy-dark);" onclick="submitAndShowResults()">
-              🏁 Finish Test &amp; Reveal All Answers
-            </button>
           </div>
 
-          <div class="palette-box" style="background: #f8fafc;">
-            <h4 style="font-size: 0.92rem; margin-bottom: 8px; color: var(--navy-dark);">Workstation Rules</h4>
-            <p style="font-size: 0.82rem; line-height: 1.6; color: var(--text-muted);">
-              • Correct answers remain hidden during your practice session.<br/>
-              • Enter values into the dashed boxes and click <strong>Save Step</strong>.<br/>
-              • Finish the test to reveal the full scorecard and detailed worked solutions at the last.
-            </p>
+          <div class="palette-box" id="toolsPanel">
+            <div class="tool-tabs">
+              <button id="tabKeypadBtn" class="active" onclick="toggleTool('keypad')">Math Keypad</button>
+              <button id="tabCalcBtn" onclick="toggleTool('calc')">Calculator</button>
+            </div>
+
+            <div id="toolKeypad">
+              <div class="keypad-grid">
+                <button class="keypad-btn" onclick="insertSymbol('/')">/</button>
+                <button class="keypad-btn" onclick="insertSymbol('-')">-</button>
+                <button class="keypad-btn" onclick="insertSymbol('+')">+</button>
+                <button class="keypad-btn" onclick="insertSymbol('<')">&lt;</button>
+                <button class="keypad-btn" onclick="insertSymbol('>')">&gt;</button>
+                <button class="keypad-btn" onclick="insertSymbol('=')">=</button>
+                <button class="keypad-btn" onclick="insertSymbol('.')">.</button>
+                <button class="keypad-btn" onclick="insertSymbol(',')">,</button>
+                <button class="keypad-btn" onclick="insertSymbol('Yes')">Yes</button>
+                <button class="keypad-btn" onclick="insertSymbol('No')">No</button>
+              </div>
+            </div>
+
+            <div id="toolCalc" style="display: none;">
+              <input type="text" id="calcDisplay" readonly value="" />
+              <div class="keypad-grid">
+                <button class="keypad-btn" onclick="pressCalc('7')">7</button>
+                <button class="keypad-btn" onclick="pressCalc('8')">8</button>
+                <button class="keypad-btn" onclick="pressCalc('9')">9</button>
+                <button class="keypad-btn" onclick="pressCalc('/')">/</button>
+                <button class="keypad-btn" onclick="pressCalc('4')">4</button>
+                <button class="keypad-btn" onclick="pressCalc('5')">5</button>
+                <button class="keypad-btn" onclick="pressCalc('6')">6</button>
+                <button class="keypad-btn" onclick="pressCalc('*')">*</button>
+                <button class="keypad-btn" onclick="pressCalc('1')">1</button>
+                <button class="keypad-btn" onclick="pressCalc('2')">2</button>
+                <button class="keypad-btn" onclick="pressCalc('3')">3</button>
+                <button class="keypad-btn" onclick="pressCalc('-')">-</button>
+                <button class="keypad-btn" onclick="pressCalc('0')">0</button>
+                <button class="keypad-btn" onclick="pressCalc('.')">.</button>
+                <button class="keypad-btn" onclick="calcEval()">=</button>
+                <button class="keypad-btn" onclick="pressCalc('+')">+</button>
+                <button class="keypad-btn" style="grid-column: span 2;" onclick="calcClear()">C</button>
+                <button class="keypad-btn" style="grid-column: span 2;" onclick="calcSqrt()">√</button>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -709,7 +837,7 @@
 
           <!-- Card 2 -->
           <div class="comp-card">
-            <h4>2. Number Line Ordering &amp; Cross Multiplication</h4>
+            <h4>2. Number Line &amp; Cross Multiplication</h4>
             <div class="recap-body">
               <p>Numbers to the right on a number line are strictly greater than numbers to the left.</p>
               <div class="formula-box">
@@ -749,17 +877,17 @@
       </div>
     </div>
 
-    <!-- View 3: Final Results & Complete Solutions (Shown at the Last) -->
+    <!-- View 3: Diagnostic Assessment Report & Full Solutions -->
     <div id="resultsView" class="view">
       <div class="hero-score-card">
-        <h2>Rational Numbers Comprehensive Evaluation Report</h2>
+        <h2>Rational Numbers Comprehensive Assessment Report</h2>
         <div class="student-badge" id="reportStudentBadge"><strong>Student: Guest</strong></div>
-        <div class="score-badge" id="scoreValue">0 / 20</div>
+        <div class="score-badge" id="scoreValue">0 / 22</div>
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
         <p id="scoreSubtitle" style="font-size:1.02rem; font-weight:600; color:var(--navy-dark); margin-top:8px;">
-          All correct answers and full step-by-step mathematical derivations are revealed below.
+          Review your step-by-step progress and worked solutions below.
         </p>
         <button class="btn-primary" style="margin-top: 14px; max-width: 240px;" onclick="window.print()">🖨️ Print Final Scorecard</button>
       </div>
@@ -772,26 +900,30 @@
 
   <script>
     /* ==========================================================================
-       COMPLETE 20-QUESTION DATASET (COVERING ALL SHARED TEXTBOOK PAGES)
+       COMPLETE 22-QUESTION DATASET (COVERING ALL 4 SHARED TEXTBOOK PAGES)
        ========================================================================== */
-    const TEST_QUESTIONS = [
+    const CHAPTER_QUESTIONS = [
       // ---------- SECTION 1: LOOKING BACK DIAGNOSTIC (Q1 - Q3) ----------
       {
         id: 1,
         section: "Looking Back (Diagnostic Assessment)",
+        source: "Looking Back, Q1 to Q5",
+        tag: "diagnostic",
         title: "Foundations & Zero Division",
-        prompt: "Answer the fundamental diagnostic questions from Looking Back (Q1 to Q4).",
+        prompt: "Answer the diagnostic questions from Looking Back (Q1 to Q5).",
         steps: [
           { prefix: "Q1: Is 8/0 a rational number? (Yes/No):", expected: "no", suffix: ".", explanation: "Division by zero is undefined; the denominator of a rational number cannot be zero." },
           { prefix: "Q2: In the standard form of a rational number, the common factor of numerator and denominator is always (0/1):", expected: "1", suffix: ".", explanation: "Numerator and denominator must be co-prime, having an HCF of 1." },
           { prefix: "Q4: Which rational numbers are equal to their reciprocals? (Enter 1, -1):", expected: "1, -1", suffix: ".", explanation: "The reciprocals of 1 and -1 are 1 and -1 respectively." },
-          { prefix: "Q5: Convert 7/(-3) into a repeating decimal (approx -2.33):", expected: "-2.33", suffix: ".", explanation: "\\[7 / (-3) = -2.333\\dots \\approx -2.33\\]" }
+          { prefix: "Q5: Convert 7/(-3) into a decimal (approx -2.33):", expected: "-2.33", suffix: ".", explanation: "\\[7 / (-3) = -2.333\\dots \\approx -2.33\\]" }
         ]
       },
       {
         id: 2,
         section: "Looking Back (Diagnostic Assessment)",
-        title: "Cross-Product Comparisons (Q3)",
+        source: "Looking Back, Q3",
+        tag: "diagnostic",
+        title: "Cross-Product Comparisons",
         prompt: "Put >, <, or = appropriately using the cross-product property.",
         steps: [
           { prefix: "Part a: (-1)/2 and 3/5: (-1)(5) = -5 vs (2)(3) = 6. (Enter <, >, or =):", expected: "<", suffix: ".", explanation: "\\[-5 < 6 \\implies -1/2 < 3/5\\]" },
@@ -802,8 +934,10 @@
       {
         id: 3,
         section: "Looking Back (Diagnostic Assessment)",
-        title: "Arithmetic Operations on Fractions (Q6)",
-        prompt: "Evaluate the given fractional operations in simplest form.",
+        source: "Looking Back, Q6",
+        tag: "diagnostic",
+        title: "Fraction Arithmetic Review",
+        prompt: "Evaluate the fractional operations in simplest form.",
         steps: [
           { prefix: "Part a: 1/(-5) + 78/100 = -20/100 + 78/100 = 58/100 =", expected: "29/50", suffix: ".", explanation: "\\[58/100 = 29/50\\]" },
           { prefix: "Part b: 11/15 - (-12/20) = 11/15 + 3/5 = 11/15 + 9/15 = 20/15 =", expected: "4/3", suffix: ".", explanation: "\\[20/15 = 4/3\\]" },
@@ -812,11 +946,13 @@
         ]
       },
 
-      // ---------- SECTION 2: DEFINITIONS & EQUIVALENCE (Q4 - Q7) ----------
+      // ---------- SECTION 2: CONCEPTS & WORKED EXAMPLES (Q4 - Q10) ----------
       {
         id: 4,
         section: "Rational Numbers Definition",
-        title: "Identifying Rational Numbers (Example 1 & Try This)",
+        source: "Textbook Example 1 & Try This",
+        tag: "concept",
+        title: "Identifying Rational Numbers",
         prompt: "State whether each number is a rational number (Yes/No).",
         steps: [
           { prefix: "Part a: 3/4 is rational? (Yes/No):", expected: "yes", suffix: ".", explanation: "Both 3 and 4 are integers and denominator is non-zero." },
@@ -830,7 +966,9 @@
       {
         id: 5,
         section: "Equivalent Rational Numbers",
-        title: "Converting to Equivalent Rational Numbers (Example 2)",
+        source: "Textbook Example 2",
+        tag: "concept",
+        title: "Equivalent Rational Number Conversions",
         prompt: "Fill in the missing values to form equivalent rational numbers.",
         steps: [
           { prefix: "Part a: 3/5 = 12 /", expected: "20", suffix: ".", explanation: "\\[(3 \\times 4) / (5 \\times 4) = 12/20\\]" },
@@ -841,9 +979,11 @@
       },
       {
         id: 6,
-        section: "Standard Form of Rational Numbers",
-        title: "Converting into Standard Form (Example 3 & Try This)",
-        prompt: "Convert the given rational numbers into standard form (positive denominator, co-prime integers).",
+        section: "Standard Form",
+        source: "Textbook Example 3 & Try This",
+        tag: "concept",
+        title: "Standard Form Reductions",
+        prompt: "Convert each rational number into standard form (positive denominator, co-prime integers).",
         steps: [
           { prefix: "Part a: 6/(-35) in standard form =", expected: "-6/35", suffix: ".", explanation: "Multiply numerator and denominator by -1 to make denominator positive." },
           { prefix: "Part b: 8/12 in standard form =", expected: "2/3", suffix: ".", explanation: "\\[(8 \\div 4) / (12 \\div 4) = 2/3\\]" },
@@ -854,32 +994,18 @@
       },
       {
         id: 7,
-        section: "Absolute Value",
-        title: "Absolute Value Calculations (Example 9 & Try This)",
-        prompt: "Find the absolute value |x| for each given rational number.",
-        steps: [
-          { prefix: "Part a: |(-2)/3| =", expected: "2/3", suffix: ".", explanation: "\\[|-2/3| = 2/3\\]" },
-          { prefix: "Part b: |(-8)/13| =", expected: "8/13", suffix: ".", explanation: "\\[|-8/13| = 8/13\\]" },
-          { prefix: "Part c: |18/(-25)| =", expected: "18/25", suffix: ".", explanation: "\\[|18/(-25)| = 18/25\\]" },
-          { prefix: "Part d: |(-12)/(-13)| =", expected: "12/13", suffix: ".", explanation: "\\[|12/13| = 12/13\\]" }
-        ]
-      },
-
-      // ---------- SECTION 3: NUMBER LINE & COMPARISON (Q8 - Q11) ----------
-      {
-        id: 8,
-        section: "Rational Numbers on a Number Line",
-        title: "Number Line Coordinates (Example 4)",
+        section: "Number Line Representation",
+        source: "Textbook Example 4",
+        tag: "concept",
+        title: "Number Line Coordinates in Thirds",
         prompt: "Examine the number line divided into thirds. Identify the fractional values at the marks.",
         svg: `<svg width="100%" height="100" viewBox="0 0 460 90" style="max-width:440px;">
           <line x1="20" y1="45" x2="440" y2="45" stroke="#64748b" stroke-width="2"/>
           <polygon points="440,45 432,41 432,49" fill="#64748b"/>
           <polygon points="20,45 28,41 28,49" fill="#64748b"/>
-          <!-- Major unit marks -->
           <line x1="90" y1="38" x2="90" y2="52" stroke="#0c4a6e" stroke-width="2"/><text x="85" y="68" font-size="10">−1</text>
           <line x1="230" y1="38" x2="230" y2="52" stroke="#0c4a6e" stroke-width="2"/><text x="227" y="68" font-size="10">0</text>
           <line x1="370" y1="38" x2="370" y2="52" stroke="#0c4a6e" stroke-width="2"/><text x="367" y="68" font-size="10">1</text>
-          <!-- Subdivisions (thirds) -->
           <line x1="137" y1="41" x2="137" y2="49" stroke="#94a3b8" stroke-width="1.5"/>
           <line x1="183" y1="41" x2="183" y2="49" stroke="#94a3b8" stroke-width="1.5"/><circle cx="183" cy="45" r="4" fill="#0284c7"/><text x="175" y="32" font-size="10" fill="#0284c7">A</text>
           <line x1="277" y1="41" x2="277" y2="49" stroke="#94a3b8" stroke-width="1.5"/>
@@ -891,9 +1017,11 @@
         ]
       },
       {
-        id: 9,
+        id: 8,
         section: "Comparison of Rational Numbers",
-        title: "Comparing Rational Numbers (Examples 5, 6 & 7)",
+        source: "Textbook Examples 5, 6 & 7",
+        tag: "concept",
+        title: "Order & Inequality Comparisons",
         prompt: "Compare using the appropriate relation (<, >, or =).",
         steps: [
           { prefix: "Part a: Compare 0 and 2/3 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "0 is to the left of 2/3 on the number line." },
@@ -903,21 +1031,39 @@
         ]
       },
       {
-        id: 10,
+        id: 9,
         section: "Ordering Rational Numbers",
-        title: "Ascending Order Ordering (Example 8)",
-        prompt: "Arrange the numbers in ascending order: 3/8, 4/12, -7/16, -2/3. (LCM of 8, 12, 16, 3 is 48).",
+        source: "Textbook Example 8",
+        tag: "concept",
+        title: "Ascending Order of Multiple Fractions",
+        prompt: "Arrange the numbers in ascending order: 3/8, 4/12, -7/16, -2/3. (LCM of denominators is 48).",
         steps: [
-          { prefix: "Step 1: Express with denominator 48: 3/8 = 18/48, 4/12 = 16/48, -7/16 = -21/48, -2/3 = -32/48. Smallest fraction is", expected: "-2/3", suffix: ".", explanation: "\\[-32/48 = -2/3\\]" },
-          { prefix: "Step 2: Largest fraction is", expected: "3/8", suffix: ".", explanation: "\\[18/48 = 3/8\\]" }
+          { prefix: "Step 1: Express with denominator 48: 3/8 = 18/48, 4/12 = 16/48, -7/16 = -21/48, -2/3 = -32/48. The smallest fraction is", expected: "-2/3", suffix: ".", explanation: "\\[-32/48 = -2/3\\]" },
+          { prefix: "Step 2: The largest fraction is", expected: "3/8", suffix: ".", explanation: "\\[18/48 = 3/8\\]" }
+        ]
+      },
+      {
+        id: 10,
+        section: "Absolute Value",
+        source: "Textbook Example 9 & Try This",
+        tag: "concept",
+        title: "Absolute Value Calculations",
+        prompt: "Find the absolute value |x| for each given rational number.",
+        steps: [
+          { prefix: "Part a: |(-2)/3| =", expected: "2/3", suffix: ".", explanation: "\\[|-2/3| = 2/3\\]" },
+          { prefix: "Part b: |(-8)/13| =", expected: "8/13", suffix: ".", explanation: "\\[|-8/13| = 8/13\\]" },
+          { prefix: "Part c: |18/(-25)| =", expected: "18/25", suffix: ".", explanation: "\\[|18/(-25)| = 18/25\\]" },
+          { prefix: "Part d: |(-12)/(-13)| =", expected: "12/13", suffix: ".", explanation: "\\[|12/13| = 12/13\\]" }
         ]
       },
 
-      // ---------- SECTION 4: EXERCISE 1A (Q11 - Q15) ----------
+      // ---------- SECTION 3: EXERCISE 1A (Q11 - Q17) ----------
       {
         id: 11,
-        section: "Exercise 1A: Classification & Standard Form",
-        title: "Exercise 1A (Q1 & Q2)",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q1 & Q2",
+        tag: "practice",
+        title: "Classification & Standard Form Reductions",
         prompt: "Answer questions 1 and 2 from Exercise 1A.",
         steps: [
           { prefix: "Q1: Is 893/0 a rational number? (Yes/No):", expected: "no", suffix: ".", explanation: "Denominator cannot be 0." },
@@ -929,21 +1075,26 @@
       },
       {
         id: 12,
-        section: "Exercise 1A: Missing Values in Equivalent Fractions",
-        title: "Exercise 1A (Q3)",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q3",
+        tag: "practice",
+        title: "Missing Terms in Equivalent Fractions",
         prompt: "Fill in the missing values in the equivalent fraction series.",
         steps: [
-          { prefix: "Part a: 4/5 = -12 / ", expected: "-15", suffix: ".", explanation: "\\[4/5 = -12/(-15)\\]" },
-          { prefix: "Part a: 4/5 = 20 / ", expected: "25", suffix: ".", explanation: "\\[4/5 = 20/25\\]" },
-          { prefix: "Part b: -5 / ", expected: "3", suffix: " = -15/9.", explanation: "\\[-15/9 = -5/3\\]" },
-          { prefix: "Part c: 6/(-16) = ", expected: "-9", suffix: " / 24.", explanation: "\\[6/(-16) = -3/8 = -9/24\\]" }
+          { prefix: "Part a: 4/5 = -12 /", expected: "-15", suffix: ".", explanation: "\\[4/5 = -12/(-15)\\]" },
+          { prefix: "Part a: 4/5 = 20 /", expected: "25", suffix: ".", explanation: "\\[4/5 = 20/25\\]" },
+          { prefix: "Part b: -5 /", expected: "3", suffix: " = -15/9.", explanation: "\\[-15/9 = -5/3\\]" },
+          { prefix: "Part c: 6/(-16) =", expected: "-9", suffix: "/ 24.", explanation: "\\[6/(-16) = -3/8 = -9/24\\]" },
+          { prefix: "Part d: 16/24 = 8 /", expected: "12", suffix: ".", explanation: "\\[16/24 = 8/12\\]" }
         ]
       },
       {
         id: 13,
-        section: "Exercise 1A: Positive Denominators & Numerator Scaling",
-        title: "Exercise 1A (Q4 & Q5)",
-        prompt: "Complete the fraction conversions with target properties.",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q4 & Q5",
+        tag: "practice",
+        title: "Positive Denominators & Target Numerator Scaling",
+        prompt: "Complete the fraction conversions with specified target properties.",
         steps: [
           { prefix: "Q4a: Express 12/(-29) with positive denominator:", expected: "-12/29", suffix: ".", explanation: "\\[-12/29\\]" },
           { prefix: "Q4c: Express (-16)/(-24) with positive denominator in standard form:", expected: "2/3", suffix: ".", explanation: "\\[16/24 = 2/3\\]" },
@@ -953,8 +1104,22 @@
       },
       {
         id: 14,
-        section: "Exercise 1A: Comparisons",
-        title: "Exercise 1A (Q7 & Q8)",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q6",
+        tag: "practice",
+        title: "Number Line Extremes",
+        prompt: "Consider the set of points: 3/7, -2/7, 1, -8/7, 0. Identify the extremes.",
+        steps: [
+          { prefix: "Step 1: The leftmost point on the number line is", expected: "-8/7", suffix: ".", explanation: "\\[-8/7\\]" },
+          { prefix: "Step 2: The rightmost point on the number line is", expected: "1", suffix: ".", explanation: "1 is the greatest number in this set." }
+        ]
+      },
+      {
+        id: 15,
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q7 & Q8",
+        tag: "practice",
+        title: "Comparisons & Choosing the Greater Fraction",
         prompt: "Compare the pairs of rational numbers.",
         steps: [
           { prefix: "Q7a: Compare -11/3 and -2/3 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "\\[-11 < -2 \\implies -11/3 < -2/3\\]" },
@@ -964,95 +1129,128 @@
         ]
       },
       {
-        id: 15,
-        section: "Exercise 1A: Advanced Inequality Symbols & Ordering",
-        title: "Exercise 1A (Q9, Q10 & Q11)",
-        prompt: "Complete the box comparisons and identify order limits.",
-        steps: [
-          { prefix: "Q9c: Compare -7/8 and 14/(-17) = -14/17: (-7)(17) = -119 vs (-14)(8) = -112 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "\\[-119 < -112 \\implies -7/8 < -14/17\\]" },
-          { prefix: "Q9d: Compare -2/9 and 8/(-36) = -2/9 (Enter <, >, =):", expected: "=", suffix: ".", explanation: "\\[8/(-36) = -2/9\\]" },
-          { prefix: "Q10: In ascending order of 2/5, -1/2, -8/15, 3/10, the smallest number is", expected: "-8/15", suffix: ".", explanation: "\\[-8/15 = -16/30 < -1/2 = -15/30\\]" },
-          { prefix: "Q11: In descending order of -7/10, -8/15, 19/30, 2/5, the greatest number is", expected: "19/30", suffix: ".", explanation: "\\[19/30 = 19/30 > 2/5 = 12/30\\]" }
-        ]
-      },
-
-      // ---------- SECTION 5: ADDITION & EXERCISE 1B (Q16 - Q20) ----------
-      {
         id: 16,
-        section: "Addition of Rational Numbers",
-        title: "Addition with Same Denominators (Examples 10, 11 & Try This)",
-        prompt: "Add the rational numbers having identical denominators.",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q9",
+        tag: "practice",
+        title: "Inequality Box Filling",
+        prompt: "Fill in the boxes with <, =, or >.",
         steps: [
-          { prefix: "Example 10: 5/6 + 7/6 = 12/6 =", expected: "2", suffix: ".", explanation: "\\[12/6 = 2\\]" },
-          { prefix: "Example 11: 7/5 + (-13/5) = (7 - 13)/5 =", expected: "-6/5", suffix: ".", explanation: "\\[-6/5\\]" },
-          { prefix: "Try This a: 2/5 + (-6/5) =", expected: "-4/5", suffix: ".", explanation: "\\[-4/5\\]" },
-          { prefix: "Try This c: (-5/7) + (-2/7) = -7/7 =", expected: "-1", suffix: ".", explanation: "\\[-7/7 = -1\\]" }
+          { prefix: "Part a: Compare -7/12 and -5/(-8) = 5/8 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "Negative fraction is less than positive fraction." },
+          { prefix: "Part b: Compare -4/9 and -3/7: (-4)(7) = -28 vs (-3)(9) = -27 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "\\[-28 < -27 \\implies -4/9 < -3/7\\]" },
+          { prefix: "Part c: Compare -7/8 and 14/(-17): (-7)(17) = -119 vs (-14)(8) = -112 (Enter <, >, =):", expected: "<", suffix: ".", explanation: "\\[-119 < -112 \\implies -7/8 < -14/17\\]" },
+          { prefix: "Part d: Compare -2/9 and 8/(-36) = -2/9 (Enter <, >, =):", expected: "=", suffix: ".", explanation: "\\[8/(-36) = -2/9\\]" },
+          { prefix: "Part e: Compare 5/8 and 25/45 = 5/9 (Enter <, >, =):", expected: ">", suffix: ".", explanation: "Same numerator 5: smaller denominator 8 means larger fraction." }
         ]
       },
       {
         id: 17,
-        section: "Addition of Rational Numbers",
-        title: "Addition with Multiple & Co-Prime Denominators (Examples 12, 13, 14)",
-        prompt: "Find the sums by determining the common denominator.",
+        section: "Exercise 1A",
+        source: "Exercise 1A, Q10 & Q11",
+        tag: "practice",
+        title: "Ascending & Descending Ordering Practice",
+        prompt: "Identify the bounding elements in the ordering sets.",
         steps: [
-          { prefix: "Example 12: 4/3 + 5/6 = 8/6 + 5/6 = 13/6 (Enter improper fraction 13/6):", expected: "13/6", suffix: ".", explanation: "\\[8/6 + 5/6 = 13/6 = 2\\frac{1}{6}\\]" },
+          { prefix: "Q10 ascending: smallest among 2/5, -1/2, 8/(-15), -3/(-10) is", expected: "-8/15", suffix: ".", explanation: "\\[-8/15 = -16/30 < -1/2 = -15/30\\]" },
+          { prefix: "Q10: largest is", expected: "2/5", suffix: ".", explanation: "\\[2/5 = 12/30 > 3/10 = 9/30\\]" },
+          { prefix: "Q11 descending: greatest among -7/10, 8/(-15), 19/30, -2/(-5) is", expected: "19/30", suffix: ".", explanation: "\\[19/30 = 19/30 > 2/5 = 12/30\\]" },
+          { prefix: "Q11: smallest is", expected: "-7/10", suffix: ".", explanation: "\\[-7/10 = -21/30 < -8/15 = -16/30\\]" }
+        ]
+      },
+
+      // ---------- SECTION 4: ADDITION & EXERCISE 1B (Q18 - Q22) ----------
+      {
+        id: 18,
+        section: "Addition of Rational Numbers",
+        source: "Textbook Examples 10 to 14",
+        tag: "addition",
+        title: "Addition with Like, Multiple & Co-Prime Denominators",
+        prompt: "Add the rational numbers.",
+        steps: [
+          { prefix: "Example 10: 5/6 + 7/6 = 12/6 =", expected: "2", suffix: ".", explanation: "\\[12/6 = 2\\]" },
+          { prefix: "Example 11: 7/5 + (-13/5) = (7 - 13)/5 =", expected: "-6/5", suffix: ".", explanation: "\\[-6/5\\]" },
+          { prefix: "Example 12: 4/3 + 5/6 = 8/6 + 5/6 = (enter improper fraction 13/6):", expected: "13/6", suffix: ".", explanation: "\\[8/6 + 5/6 = 13/6 = 2\\frac{1}{6}\\]" },
           { prefix: "Example 13: (-3/7) + (-5/21) = (-9 - 5)/21 = -14/21 =", expected: "-2/3", suffix: ".", explanation: "\\[-14/21 = -2/3\\]" },
           { prefix: "Example 14: 4/5 + (-6/7) = (28 - 30)/35 =", expected: "-2/35", suffix: ".", explanation: "\\[-2/35\\]" }
         ]
       },
       {
-        id: 18,
-        section: "Exercise 1B: Addition Practice",
-        title: "Exercise 1B (Q1 & Q2 a - d)",
-        prompt: "Add and simplify the rational numbers.",
-        steps: [
-          { prefix: "Q1a: 2/9 + 5/9 =", expected: "7/9", suffix: ".", explanation: "\\[7/9\\]" },
-          { prefix: "Q1b: 11/15 + (-7/15) = 4/15 =", expected: "4/15", suffix: ".", explanation: "\\[4/15\\]" },
-          { prefix: "Q1c: (-5/12) + (-7/12) = -12/12 =", expected: "-1", suffix: ".", explanation: "\\[-1\\]" },
-          { prefix: "Q2a: 7/11 + 1/6 = (42 + 11)/66 =", expected: "53/66", suffix: ".", explanation: "\\[53/66\\]" },
-          { prefix: "Q2b: (-3/7) + 2/5 = (-15 + 14)/35 =", expected: "-1/35", suffix: ".", explanation: "\\[-1/35\\]" }
-        ]
-      },
-      {
         id: 19,
-        section: "Exercise 1B: Addition Practice Continued",
-        title: "Exercise 1B (Q2 e - j)",
-        prompt: "Simplify the additions with unlike denominators.",
+        section: "Addition of Rational Numbers",
+        source: "Textbook Example 15 & Try This",
+        tag: "addition",
+        title: "Common Factor Denominators & Try This Additions",
+        prompt: "Add the fractions using LCM of denominators.",
         steps: [
-          { prefix: "Q2d: 3/4 + (-2/3) = (9 - 8)/12 =", expected: "1/12", suffix: ".", explanation: "\\[1/12\\]" },
-          { prefix: "Q2e: 3/8 + 1/6 = (9 + 4)/24 =", expected: "13/24", suffix: ".", explanation: "\\[13/24\\]" },
-          { prefix: "Q2h: 6/40 + 1/25 = 3/20 + 1/25 = (15 + 4)/100 =", expected: "19/100", suffix: ".", explanation: "\\[19/100\\]" },
-          { prefix: "Q2i: 16/18 + (-16/27) = 8/9 - 16/27 = (24 - 16)/27 =", expected: "8/27", suffix: ".", explanation: "\\[8/27\\]" }
+          { prefix: "Example 15: 5/12 + 7/8 = 10/24 + 21/24 =", expected: "31/24", suffix: ".", explanation: "\\[31/24 = 1\\frac{7}{24}\\]" },
+          { prefix: "Try this a: 2/5 + (-6/5) =", expected: "-4/5", suffix: ".", explanation: "\\[-4/5\\]" },
+          { prefix: "Try this b: 1/2 + 3/8 = 4/8 + 3/8 =", expected: "7/8", suffix: ".", explanation: "\\[7/8\\]" },
+          { prefix: "Try this d: 4/10 + 7/15 = 2/5 + 7/15 = 6/15 + 7/15 =", expected: "13/15", suffix: ".", explanation: "\\[13/15\\]" }
         ]
       },
       {
         id: 20,
-        section: "Properties of Addition",
-        title: "Addition Properties & Inverses (Exercise 1B Q3 & Q4)",
-        prompt: "Identify the properties and values in the identity and inverse relations.",
+        section: "Exercise 1B",
+        source: "Exercise 1B, Q1",
+        tag: "addition",
+        title: "Addition with Identical Denominators",
+        prompt: "Add and simplify each pair of rational numbers.",
         steps: [
-          { prefix: "Q3a: 3/7 + 4/9 = 4/9 + ", expected: "3/7", suffix: " (Commutative Property).", explanation: "Commutative property: a + b = b + a." },
-          { prefix: "Q3e: (-7)/18 + 0 = ", expected: "-7/18", suffix: " (Additive Identity).", explanation: "0 is the additive identity." },
-          { prefix: "Q3f: (-7)/26 + ", expected: "7/26", suffix: " = 0 (Additive Inverse).", explanation: "The additive inverse of -a/b is a/b." },
+          { prefix: "Part a: 2/9 + 5/9 =", expected: "7/9", suffix: ".", explanation: "\\[7/9\\]" },
+          { prefix: "Part b: 11/15 + (-7/15) =", expected: "4/15", suffix: ".", explanation: "\\[4/15\\]" },
+          { prefix: "Part c: (-5/12) + (-7/12) = -12/12 =", expected: "-1", suffix: ".", explanation: "\\[-1\\]" },
+          { prefix: "Part d: 7/40 + (-23/40) = -16/40 =", expected: "-2/5", suffix: ".", explanation: "\\[-16/40 = -2/5\\]" },
+          { prefix: "Part e: (-8/25) + 4/25 =", expected: "-4/25", suffix: ".", explanation: "\\[-4/25\\]" },
+          { prefix: "Part f: 22/35 + (-15/35) = 7/35 =", expected: "1/5", suffix: ".", explanation: "\\[7/35 = 1/5\\]" }
+        ]
+      },
+      {
+        id: 21,
+        section: "Exercise 1B",
+        source: "Exercise 1B, Q2",
+        tag: "addition",
+        title: "Simplification with Unlike Denominators",
+        prompt: "Simplify each sum with unlike denominators.",
+        steps: [
+          { prefix: "Part a: 7/11 + 1/6 = (42 + 11)/66 =", expected: "53/66", suffix: ".", explanation: "\\[53/66\\]" },
+          { prefix: "Part b: (-3/7) + 2/5 = (-15 + 14)/35 =", expected: "-1/35", suffix: ".", explanation: "\\[-1/35\\]" },
+          { prefix: "Part d: 3/4 + (-2/3) = (9 - 8)/12 =", expected: "1/12", suffix: ".", explanation: "\\[1/12\\]" },
+          { prefix: "Part e: 3/8 + 1/6 = (9 + 4)/24 =", expected: "13/24", suffix: ".", explanation: "\\[13/24\\]" },
+          { prefix: "Part h: 6/40 + 1/25 = 3/20 + 1/25 = (15 + 4)/100 =", expected: "19/100", suffix: ".", explanation: "\\[19/100\\]" },
+          { prefix: "Part i: 16/18 + (-16/27) = 8/9 - 16/27 = (24 - 16)/27 =", expected: "8/27", suffix: ".", explanation: "\\[8/27\\]" }
+        ]
+      },
+      {
+        id: 22,
+        section: "Exercise 1B",
+        source: "Exercise 1B, Q3 & Q4",
+        tag: "addition",
+        title: "Addition Properties, Inverses & Associativity",
+        prompt: "Complete the statements and identify properties.",
+        steps: [
+          { prefix: "Q3a: 3/7 + 4/9 = 4/9 +", expected: "3/7", suffix: " (Commutative Property).", explanation: "Commutative property: a + b = b + a." },
+          { prefix: "Q3b: 6/13 + (4/9 + 7/9) = (6/13 + 4/9) +", expected: "7/9", suffix: " (Associative Property).", explanation: "Associative property: a + (b + c) = (a + b) + c." },
+          { prefix: "Q3e: (-7/18) +", expected: "0", suffix: " = -7/18 (Additive Identity).", explanation: "0 is the additive identity." },
+          { prefix: "Q3f: (-7/26) +", expected: "7/26", suffix: " = 0 (Additive Inverse).", explanation: "Additive inverse of -a/b is a/b." },
           { prefix: "Q4: Does [(-2/5) + 4/9] + (-3/4) equal (-2/5) + [4/9 + (-3/4)]? (Yes/No):", expected: "yes", suffix: ".", explanation: "Associative property holds for addition of rational numbers." }
         ]
       }
     ];
 
     /* ==========================================================================
-       ENGINE, TEST MODE DATA STORAGE & RESULTS LOGIC
+       ENGINE, 2-ATTEMPT SCAFFOLDING & SHOW SOLUTION PATTERN
        ========================================================================== */
     let currentStudentName = "Guest";
     let currentQuestionIndex = 0;
     
-    // User response maps: qId -> array of string values for steps
-    let userAnswers = {};
-    let questionStatus = {}; // 'unseen', 'active', 'answered', 'skipped'
-    
+    // Per-question tracking: completedSteps (number of unlocked steps verified)
+    let questionStates = CHAPTER_QUESTIONS.map(() => ({ completedSteps: 0, status: "unseen" }));
+    let stepAttempts = {}; // key: `${qIdx}_${sIdx}` -> count of failed attempts
+
     let audioMuted = false;
     let totalSeconds = 0;
     let timerInterval = null;
-    let isTestSubmitted = false;
+    let activeInputRef = null;
 
     const AudioEngine = {
       ctx: null,
@@ -1080,14 +1278,20 @@
           }
         }, delay * 1000);
       },
-      click() {
+      correct() {
         this.init();
-        this.playTone(520, 'sine', 0.08, 0);
+        this.playTone(659.25, 'sine', 0.15, 0);
+        this.playTone(880.00, 'sine', 0.25, 0.12);
+      },
+      incorrect() {
+        this.init();
+        this.playTone(196.00, 'triangle', 0.2, 0);
+        this.playTone(146.83, 'triangle', 0.3, 0.12);
       },
       milestone() {
         this.init();
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-          this.playTone(freq, 'sine', 0.22, idx * 0.09);
+          this.playTone(freq, 'sine', 0.25, idx * 0.1);
         });
       }
     };
@@ -1102,19 +1306,15 @@
       }, 1000);
     }
 
-    function stopTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-    }
-
     function showToast(msg) {
       const t = document.getElementById('toastMessage');
       t.innerText = msg;
       t.style.display = 'block';
-      setTimeout(() => { t.style.display = 'none'; }, 2600);
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
     }
 
     function initDirectLogin() {
-      const name = document.getElementById('studentNameInput').value.trim() || 'Student';
+      const name = document.getElementById('studentNameInput').value.trim() || 'Ankit Agrawal';
       currentStudentName = name;
       sessionStorage.setItem('bm_rational_student', name);
       document.getElementById('userPill').innerHTML = `<strong>Student: ${name}</strong>`;
@@ -1124,6 +1324,7 @@
       startTimer();
       renderPalette();
       loadQuestion(0);
+      renderSolutions();
     }
 
     function normalizeInput(str) {
@@ -1153,16 +1354,11 @@
     }
 
     function switchView(viewId) {
-      if (viewId === 'resultsView' && !isTestSubmitted) {
-        showToast("Please complete and finish the test to view the results.");
-        return;
-      }
-
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
 
-      if (viewId === 'testView') document.getElementById('tabTestBtn').classList.add('active');
+      if (viewId === 'practiceView') document.getElementById('tabPracticeBtn').classList.add('active');
       if (viewId === 'theoryView') document.getElementById('tabTheoryBtn').classList.add('active');
       if (viewId === 'resultsView') document.getElementById('tabResultsBtn').classList.add('active');
 
@@ -1175,18 +1371,19 @@
       const grid = document.getElementById('paletteGrid');
       grid.innerHTML = '';
 
-      let answeredCount = 0;
-      TEST_QUESTIONS.forEach((q, idx) => {
-        const isAnswered = questionStatus[q.id] === 'answered';
-        if (isAnswered) answeredCount++;
+      let solvedCount = 0;
+      CHAPTER_QUESTIONS.forEach((q, idx) => {
+        const state = questionStates[idx];
+        const isSolved = state.status === 'completed';
+        if (isSolved) solvedCount++;
 
         const btn = document.createElement('button');
         let stateClass = '';
         if (idx === currentQuestionIndex) {
           stateClass = 'active';
-        } else if (isAnswered) {
-          stateClass = 'answered';
-        } else if (questionStatus[q.id] === 'skipped') {
+        } else if (isSolved) {
+          stateClass = 'completed';
+        } else if (state.status === 'skipped') {
           stateClass = 'skipped';
         }
 
@@ -1197,47 +1394,53 @@
         grid.appendChild(btn);
       });
 
-      document.getElementById('paletteCount').innerText = `${answeredCount} / ${TEST_QUESTIONS.length} Answered`;
+      document.getElementById('paletteCount').innerText = `${solvedCount} / ${CHAPTER_QUESTIONS.length} Completed`;
     }
 
     function loadQuestion(idx) {
       currentQuestionIndex = idx;
       renderPalette();
-      const q = TEST_QUESTIONS[idx];
+      const q = CHAPTER_QUESTIONS[idx];
+      const state = questionStates[idx];
       const card = document.getElementById('activeQuestionCard');
-
-      if (!userAnswers[q.id]) {
-        userAnswers[q.id] = new Array(q.steps.length).fill('');
-      }
 
       let bodyHtml = '';
       q.steps.forEach((st, sIdx) => {
-        const savedVal = userAnswers[q.id][sIdx] || '';
+        const isUnlocked = sIdx <= state.completedSteps;
+        const isPassed = sIdx < state.completedSteps;
+        const key = `${idx}_${sIdx}`;
+        const attempts = stepAttempts[key] || 0;
+
         bodyHtml += `
-          <div class="step-box">
+          <div class="step-box ${isUnlocked ? 'unlocked' : ''} ${isPassed ? 'success' : ''}" id="stepBox_${idx}_${sIdx}">
             <div class="step-text-wrap">
               <span>${st.prefix}</span>
-              <input type="text" class="inline-blank" id="stepInput_${q.id}_${sIdx}" 
-                value="${savedVal}" 
+              <input type="text" class="inline-blank" id="stepInput_${idx}_${sIdx}" 
+                value="${isPassed ? st.expected : ''}" 
                 placeholder="enter value"
-                oninput="updateStepInput(${q.id}, ${sIdx}, this.value)" />
+                ${isPassed ? 'disabled' : ''} 
+                onfocus="activeInputRef = this;" />
               <span>${st.suffix}</span>
-              <button class="btn-save-step" onclick="saveStep(${q.id}, ${sIdx})">Save Step</button>
-              <span class="saved-status-badge" id="savedBadge_${q.id}_${sIdx}">${savedVal ? '✓ Saved' : ''}</span>
+              ${!isPassed ? `
+                <button class="btn-verify" onclick="verifyStep(${idx}, ${sIdx})">Verify</button>
+                <span class="attempts-badge">Attempts: ${attempts}/2</span>
+                ${attempts >= 2 ? `<button class="btn-reveal" onclick="autoFillStep(${idx}, ${sIdx})">Auto-Fill Answer</button>` : ''}
+              ` : `<span style="color: var(--green-ok); font-weight: bold; margin-left: 8px;">✓ Verified</span>`}
             </div>
+            ${isPassed ? `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-radius:6px; border-left:4px solid var(--brand-blue); font-size:0.92rem; color:var(--text-main);">${st.explanation}</div>` : ''}
           </div>
         `;
       });
 
       const prevDisabled = idx === 0 ? 'disabled' : '';
-      const nextDisabled = idx === TEST_QUESTIONS.length - 1 ? 'disabled' : '';
+      const nextDisabled = idx === CHAPTER_QUESTIONS.length - 1 ? 'disabled' : '';
 
       card.innerHTML = `
         <span class="concept-tag">${q.section}</span>
         <h2 style="color:var(--navy-dark); margin: 6px 0 10px 0;">Problem ${q.id}: ${q.title}</h2>
         <p style="margin-top: 8px; line-height: 1.65; font-size:1.02rem;">${q.prompt}</p>
         ${q.svg ? `<div class="svg-container">${q.svg}</div>` : ''}
-        <div>${bodyHtml}</div>
+        <div id="qBodyContainer">${bodyHtml}</div>
 
         <div class="nav-toolbar">
           <button class="btn-nav-action" onclick="navigateQuestion(-1)" ${prevDisabled}>
@@ -1259,126 +1462,146 @@
       }
     }
 
-    function updateStepInput(qId, sIdx, val) {
-      if (!userAnswers[qId]) userAnswers[qId] = [];
-      userAnswers[qId][sIdx] = val.trim();
+    function autoFillStep(qIdx, sIdx) {
+      const inputEl = document.getElementById(`stepInput_${qIdx}_${sIdx}`);
+      if (inputEl) {
+        inputEl.value = CHAPTER_QUESTIONS[qIdx].steps[sIdx].expected;
+        verifyStep(qIdx, sIdx);
+      }
     }
 
-    function saveStep(qId, sIdx) {
-      const inputEl = document.getElementById(`stepInput_${qId}_${sIdx}`);
-      const val = inputEl ? inputEl.value.trim() : '';
-      if (!userAnswers[qId]) userAnswers[qId] = [];
-      userAnswers[qId][sIdx] = val;
+    function verifyStep(qIdx, sIdx) {
+      const inputEl = document.getElementById(`stepInput_${qIdx}_${sIdx}`);
+      const val = normalizeInput(inputEl.value);
+      const expected = normalizeInput(CHAPTER_QUESTIONS[qIdx].steps[sIdx].expected);
+      const key = `${qIdx}_${sIdx}`;
 
-      const badge = document.getElementById(`savedBadge_${qId}_${sIdx}`);
-      if (badge) badge.innerText = val ? '✓ Saved' : '';
+      const isCorrect = (val === expected) || checkNumericalTolerance(val, expected);
 
-      const anyAnswered = userAnswers[qId].some(x => x && x.length > 0);
-      if (anyAnswered) {
-        questionStatus[qId] = 'answered';
+      if (isCorrect) {
+        AudioEngine.correct();
+        questionStates[qIdx].completedSteps++;
+        if (questionStates[qIdx].completedSteps >= CHAPTER_QUESTIONS[qIdx].steps.length) {
+          questionStates[qIdx].status = "completed";
+          AudioEngine.milestone();
+          showToast(`Problem ${qIdx + 1} Fully Solved!`);
+        }
+        renderPalette();
+        loadQuestion(qIdx);
+        renderSolutions();
+      } else {
+        AudioEngine.incorrect();
+        stepAttempts[key] = (stepAttempts[key] || 0) + 1;
+        inputEl.style.borderColor = "var(--red-fail)";
+        if (stepAttempts[key] >= 2) {
+          showToast("2 attempts reached. Click 'Auto-Fill Answer' to reveal the step solution.");
+        } else {
+          showToast("Incorrect answer. You have 1 attempt remaining!");
+        }
+        loadQuestion(qIdx);
       }
-
-      AudioEngine.click();
-      showToast(`Step saved for Problem ${qId}.`);
-      renderPalette();
     }
 
     function navigateQuestion(delta) {
       const target = currentQuestionIndex + delta;
-      if (target >= 0 && target < TEST_QUESTIONS.length) {
+      if (target >= 0 && target < CHAPTER_QUESTIONS.length) {
         loadQuestion(target);
       }
     }
 
     function skipQuestion() {
-      const currentQ = TEST_QUESTIONS[currentQuestionIndex];
-      if (questionStatus[currentQ.id] !== 'answered') {
-        questionStatus[currentQ.id] = 'skipped';
+      if (questionStates[currentQuestionIndex].status !== "completed") {
+        questionStates[currentQuestionIndex].status = "skipped";
       }
-      showToast(`Problem ${currentQ.id} marked as skipped.`);
+      showToast(`Problem ${currentQuestionIndex + 1} marked as skipped.`);
       renderPalette();
       navigateQuestion(1);
     }
 
-    /* ==========================================================================
-       SUBMIT & REVEAL RESULTS AT THE LAST
-       ========================================================================== */
-    function submitAndShowResults() {
-      isTestSubmitted = true;
-      stopTimer();
-      AudioEngine.milestone();
-      switchView('resultsView');
-      generateAndRenderFinalResults();
-      showToast("Test completed! Viewing full results and solutions.");
-    }
-
-    function generateAndRenderFinalResults() {
+    function renderSolutions() {
       const container = document.getElementById('completeSolutionsContainer');
-      let totalQuestions = TEST_QUESTIONS.length;
-      let totalScore = 0;
+      let solvedCount = questionStates.filter(p => p.status === "completed").length;
+      let totalQuestions = CHAPTER_QUESTIONS.length;
+      const percentage = Math.round((solvedCount / totalQuestions) * 100);
+
+      document.getElementById('scoreValue').innerText = `${solvedCount} / ${totalQuestions}`;
+      document.getElementById('progressBarFill').style.width = `${percentage}%`;
+      document.getElementById('reportStudentBadge').innerHTML = `<strong>Student: ${currentStudentName}</strong> (${percentage}% Solved)`;
 
       let html = '';
+      CHAPTER_QUESTIONS.forEach((q, idx) => {
+        const state = questionStates[idx];
+        const isCompleted = state.status === "completed";
 
-      TEST_QUESTIONS.forEach((q) => {
-        const studentSteps = userAnswers[q.id] || [];
-        let correctStepsCount = 0;
-
-        let stepsComparisonHtml = q.steps.map((st, sIdx) => {
-          const studentVal = studentSteps[sIdx] || '';
-          const normalizedStudent = normalizeInput(studentVal);
-          const normalizedExpected = normalizeInput(st.expected);
-
-          const isStepOk = (normalizedStudent === normalizedExpected) || checkNumericalTolerance(normalizedStudent, normalizedExpected);
-          if (isStepOk) correctStepsCount++;
-
-          return `
-            <div style="margin-bottom: 10px; padding: 10px 14px; background: ${isStepOk ? 'var(--green-surf)' : '#fff'}; border: 1px solid ${isStepOk ? 'var(--green-ok)' : 'var(--border-soft)'}; border-radius: 6px;">
-              <p><strong>Step ${sIdx + 1}:</strong> ${st.prefix} <strong>[${st.expected}]</strong> ${st.suffix}</p>
-              <p style="font-size: 0.9rem; margin-top: 4px;">
-                Your Answer: <strong>${studentVal ? studentVal : '<em>(unanswered)</em>'}</strong> &nbsp;|&nbsp; 
-                Result: <strong style="color: ${isStepOk ? 'var(--green-ok)' : 'var(--red-fail)'};">${isStepOk ? '✓ Correct' : '✗ Incorrect'}</strong>
-              </p>
-              <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">${st.explanation}</p>
-            </div>
-          `;
-        }).join('');
-
-        const isFullySolved = correctStepsCount === q.steps.length;
-        let userResultBadge = '';
-        if (isFullySolved) {
-          totalScore += 1;
-          userResultBadge = `<span style="color:var(--green-ok); font-weight:bold;">✓ Fully Correct (1/1)</span>`;
-        } else if (correctStepsCount > 0) {
-          const partial = Math.round((correctStepsCount / q.steps.length) * 100) / 100;
-          totalScore += partial;
-          userResultBadge = `<span style="color:var(--brand-gold); font-weight:bold;">Partial (${correctStepsCount}/${q.steps.length} Steps)</span>`;
-        } else {
-          userResultBadge = `<span style="color:var(--red-fail); font-weight:bold;">✗ Incorrect (0/1)</span>`;
-        }
+        let statusBadge = isCompleted 
+          ? `<span style="color:var(--green-ok); font-weight:bold;">✓ Completed</span>`
+          : (state.completedSteps > 0 
+              ? `<span style="color:var(--brand-gold); font-weight:bold;">In Progress (${state.completedSteps}/${q.steps.length} Steps)</span>` 
+              : `<span style="color:var(--text-muted); font-weight:bold;">Unattempted</span>`);
 
         html += `
           <div class="theory-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="concept-tag">${q.section}</span>
-              ${userResultBadge}
+              ${statusBadge}
             </div>
             <h3 style="margin-top:6px;">Problem ${q.id}: ${q.title}</h3>
-            <p style="font-size:1rem; line-height:1.65;">${q.prompt}</p>
+            <p style="font-size:0.98rem; line-height:1.6;">${q.prompt}</p>
             ${q.svg ? `<div class="svg-container" style="max-width:380px; margin:12px 0;">${q.svg}</div>` : ''}
-            <div style="margin-top:12px;">${stepsComparisonHtml}</div>
+            
+            <div class="proof-section" style="margin-top:12px;">
+              ${q.steps.map((st, sIdx) => `
+                <div style="background:#f8fafc; border-left:4px solid var(--brand-blue); padding:10px 14px; margin-bottom:8px; border-radius:0 6px 6px 0;">
+                  <strong>Step ${sIdx + 1}:</strong> ${st.prefix} <strong>[ ${st.expected} ]</strong> ${st.suffix}<br/>
+                  <div style="margin-top:6px; font-size:0.92rem; color:var(--text-muted);">${st.explanation}</div>
+                </div>
+              `).join('')}
+            </div>
           </div>
         `;
       });
 
-      const finalPercentage = Math.round((totalScore / totalQuestions) * 100);
-      document.getElementById('scoreValue').innerText = `${Math.round(totalScore * 10) / 10} / ${totalQuestions}`;
-      document.getElementById('progressBarFill').style.width = `${finalPercentage}%`;
-      document.getElementById('reportStudentBadge').innerHTML = `<strong>Student: ${currentStudentName}</strong> (${finalPercentage}% Score)`;
-
       container.innerHTML = html;
-
       if (window.MathJax && window.MathJax.typesetPromise) {
         MathJax.typesetPromise();
+      }
+    }
+
+    function toggleTool(tool) {
+      if (tool === 'keypad') {
+        document.getElementById('toolKeypad').style.display = 'block';
+        document.getElementById('toolCalc').style.display = 'none';
+        document.getElementById('tabKeypadBtn').classList.add('active');
+        document.getElementById('tabCalcBtn').classList.remove('active');
+      } else {
+        document.getElementById('toolKeypad').style.display = 'none';
+        document.getElementById('toolCalc').style.display = 'block';
+        document.getElementById('tabCalcBtn').classList.add('active');
+        document.getElementById('tabKeypadBtn').classList.remove('active');
+      }
+    }
+
+    function insertSymbol(sym) {
+      if (activeInputRef) {
+        activeInputRef.value += sym;
+        activeInputRef.focus();
+      }
+    }
+
+    function pressCalc(val) { document.getElementById('calcDisplay').value += val; }
+    function calcClear() { document.getElementById('calcDisplay').value = ''; }
+    function calcEval() {
+      try {
+        document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value);
+      } catch (e) {
+        document.getElementById('calcDisplay').value = 'Error';
+      }
+    }
+    function calcSqrt() {
+      try {
+        document.getElementById('calcDisplay').value = Math.sqrt(parseFloat(document.getElementById('calcDisplay').value));
+      } catch (e) {
+        document.getElementById('calcDisplay').value = 'Error';
       }
     }
 
